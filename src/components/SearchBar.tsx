@@ -19,7 +19,9 @@ export default function SearchBar({ value, onChange }: Props) {
           aria-label="Clear search"
           onClick={() => onChange('')}
           style={styles.clear}
-        >×</button>
+        >
+          ×
+        </button>
       )}
     </div>
   );

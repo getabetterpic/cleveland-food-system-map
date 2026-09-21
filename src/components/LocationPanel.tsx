@@ -4,13 +4,13 @@ import type { Category, Location } from '../lib/types';
 
 const CATEGORY_LABEL: Record<Category, string> = {
   garden: 'Community Garden',
-  farm:   'Urban Farm',
+  farm: 'Urban Farm',
   market: 'Farmers Market / Farm Stand',
 };
 
 const CATEGORY_COLOR: Record<Category, string> = {
   garden: '#3a7d44',
-  farm:   '#c0392b',
+  farm: '#c0392b',
   market: '#7b2d8b',
 };
 
@@ -81,8 +81,20 @@ export default function LocationPanel({ location, onClose }: Props) {
         />
       )}
 
-      <div style={panelStyle} role="dialog" aria-modal="true" aria-label={location.name}>
-        <button ref={closeRef} style={styles.close} onClick={onClose} aria-label="Close">×</button>
+      <div
+        style={panelStyle}
+        role="dialog"
+        aria-modal="true"
+        aria-label={location.name}
+      >
+        <button
+          ref={closeRef}
+          style={styles.close}
+          onClick={onClose}
+          aria-label="Close"
+        >
+          ×
+        </button>
 
         {location.image_url && (
           <img
@@ -99,23 +111,27 @@ export default function LocationPanel({ location, onClose }: Props) {
 
           <h2 style={styles.name}>{location.name}</h2>
 
-          {location.address && (
-            <p style={styles.field}>{location.address}</p>
-          )}
+          {location.address && <p style={styles.field}>{location.address}</p>}
 
           {location.manager_name && (
-            <p style={styles.field}><strong>Manager:</strong> {location.manager_name}</p>
+            <p style={styles.field}>
+              <strong>Manager:</strong> {location.manager_name}
+            </p>
           )}
 
           {location.phone && (
             <p style={styles.field}>
-              <a href={`tel:${location.phone}`} style={styles.link}>{location.phone}</a>
+              <a href={`tel:${location.phone}`} style={styles.link}>
+                {location.phone}
+              </a>
             </p>
           )}
 
           {location.email && (
             <p style={styles.field}>
-              <a href={`mailto:${location.email}`} style={styles.link}>{location.email}</a>
+              <a href={`mailto:${location.email}`} style={styles.link}>
+                {location.email}
+              </a>
             </p>
           )}
 

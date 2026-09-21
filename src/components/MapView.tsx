@@ -3,7 +3,6 @@ import { DivIcon } from 'leaflet';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import type { Category, Location } from '../lib/types';
 
-
 function ZoomControl() {
   const map = useMap();
   return (
@@ -12,12 +11,16 @@ function ZoomControl() {
         aria-label="Zoom in"
         style={zoomStyles.btn}
         onClick={() => map.zoomIn()}
-      >+</button>
+      >
+        +
+      </button>
       <button
         aria-label="Zoom out"
         style={{ ...zoomStyles.btn, borderTop: '1px solid #ccc' }}
         onClick={() => map.zoomOut()}
-      >−</button>
+      >
+        −
+      </button>
     </div>
   );
 }
@@ -53,13 +56,13 @@ const zoomStyles: Record<string, React.CSSProperties> = {
 
 const CATEGORY_COLOR: Record<Category, string> = {
   garden: '#3a7d44',
-  farm:   '#c0392b',
+  farm: '#c0392b',
   market: '#7b2d8b',
 };
 
 const CATEGORY_LABEL: Record<Category, string> = {
   garden: 'Community Garden',
-  farm:   'Urban Farm',
+  farm: 'Urban Farm',
   market: 'Farmers Market / Farm Stand',
 };
 
@@ -74,7 +77,7 @@ function makePinIcon(category: Category): DivIcon {
     `</svg>`;
   return new DivIcon({
     html: svg,
-    className: '',        // suppress default leaflet-div-icon white box
+    className: '', // suppress default leaflet-div-icon white box
     iconSize: [24, 32],
     iconAnchor: [12, 32], // tip of the pin sits on the coordinate
   });
@@ -83,19 +86,23 @@ function makePinIcon(category: Category): DivIcon {
 // Pre-built — one icon instance per category, not per marker
 const PIN_ICONS: Record<Category, DivIcon> = {
   garden: makePinIcon('garden'),
-  farm:   makePinIcon('farm'),
+  farm: makePinIcon('farm'),
   market: makePinIcon('market'),
 };
 
 const CLEVELAND: [number, number] = [41.482, -81.668];
 
 interface Props {
-  locations: Location[];
+  locations?: Location[];
   activeCategories: Category[];
   onSelectLocation: (location: Location) => void;
 }
 
-export default function MapView({ locations, activeCategories, onSelectLocation }: Props) {
+export default function MapView({
+  locations,
+  activeCategories,
+  onSelectLocation,
+}: Props) {
   return (
     <MapContainer
       center={CLEVELAND}
@@ -110,10 +117,15 @@ export default function MapView({ locations, activeCategories, onSelectLocation 
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       {locations
-        .filter((loc) => loc.lat !== null && loc.lng !== null && activeCategories.includes(loc.category))
+        .filter(
+          (loc) =>
+            loc.lat !== null &&
+            loc.lng !== null &&
+            activeCategories.includes(loc.category),
+        )
         .map((loc) => (
           <Marker
-            key={loc.id}
+            key={loc.name + loc.lat + loc.lng}
             position={[loc.lat as number, loc.lng as number]}
             icon={PIN_ICONS[loc.category]}
             title={loc.name}

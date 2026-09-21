@@ -2,13 +2,13 @@ import type { Category } from '../lib/types';
 
 const LABELS: Record<Category, string> = {
   garden: 'Gardens',
-  farm:   'Farms',
+  farm: 'Farms',
   market: 'Markets',
 };
 
 const ACCENT: Record<Category, string> = {
   garden: '#3a7d44',
-  farm:   '#c0392b',
+  farm: '#c0392b',
   market: '#7b2d8b',
 };
 
@@ -20,7 +20,11 @@ interface Props {
   onChange: (categories: Category[]) => void;
 }
 
-export default function CategoryFilter({ activeCategories, counts, onChange }: Props) {
+export default function CategoryFilter({
+  activeCategories,
+  counts,
+  onChange,
+}: Props) {
   function toggle(cat: Category) {
     const isActive = activeCategories.includes(cat);
     // Prevent deselecting the last active button
