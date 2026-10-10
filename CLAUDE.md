@@ -106,6 +106,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - **Mobile first.** Every component starts at 320px and scales up.
 - **Breakpoint:** 768px for desktop layout (sidebar + map).
 - **Colors:** white/grey/black base. `#3a7d44` accent used sparingly.
+- **Links:** blue `#1d4ed8` + underline (Tailwind preflight strips both — set them explicitly).
 - **No red** anywhere — colorblind accessibility.
 - **Destructive actions** use dark/black styling, never red.
 - **Typography:** clean, no decorative fonts in UI.
