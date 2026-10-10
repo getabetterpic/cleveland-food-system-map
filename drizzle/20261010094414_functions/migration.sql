@@ -2,8 +2,6 @@
 -- + 16 random bytes, base62-encoded to a fixed 27 chars. Sorts by creation time.
 create extension if not exists pgcrypto with schema extensions;
 --> statement-breakpoint
-create extension if not exists moddatetime with schema extensions;
---> statement-breakpoint
 create or replace function public.gen_ksuid()
 returns text
 language plpgsql
@@ -25,5 +23,27 @@ begin
     n := div(n, 62);
   end loop;
   return result;
+end;
+$$;
+--> statement-breakpoint
+-- Owns created_at/created_by/updated_at/updated_by. Overwrites client values so
+-- audit fields can't be spoofed through PostgREST. auth.uid() is null for
+-- service-role writes (KML import, dashboard), which leaves *_by null.
+create or replace function public.set_audit_fields()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if tg_op = 'INSERT' then
+    new.created_at := now();
+    new.created_by := auth.uid();
+  else
+    new.created_at := old.created_at;
+    new.created_by := old.created_by;
+  end if;
+  new.updated_at := now();
+  new.updated_by := auth.uid();
+  return new;
 end;
 $$;

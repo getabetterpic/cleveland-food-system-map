@@ -19,7 +19,7 @@ export default function useLocations(): UseLocationsResult {
     supabase
       .from('locations')
       .select('*')
-      .eq('archived', false)
+      .eq('status', 'published')
       .then(({ data, error: sbError }) => {
         if (cancelled) return;
         if (sbError) {

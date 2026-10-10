@@ -18,4 +18,9 @@ const supabase = createBrowserClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
 );
 
+export function locationImageUrl(path: string): string {
+  return supabase.storage.from('location-images').getPublicUrl(path).data
+    .publicUrl;
+}
+
 export default supabase;
