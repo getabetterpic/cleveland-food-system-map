@@ -113,28 +113,6 @@ export default function LocationPanel({ location, onClose }: Props) {
 
           {location.address && <p style={styles.field}>{location.address}</p>}
 
-          {location.manager_name && (
-            <p style={styles.field}>
-              <strong>Manager:</strong> {location.manager_name}
-            </p>
-          )}
-
-          {location.phone && (
-            <p style={styles.field}>
-              <a href={`tel:${location.phone}`} style={styles.link}>
-                {location.phone}
-              </a>
-            </p>
-          )}
-
-          {location.email && (
-            <p style={styles.field}>
-              <a href={`mailto:${location.email}`} style={styles.link}>
-                {location.email}
-              </a>
-            </p>
-          )}
-
           {location.notes && (
             <p style={{ ...styles.field, marginTop: 12 }}>{location.notes}</p>
           )}

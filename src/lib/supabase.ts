@@ -1,13 +1,13 @@
 import { createBrowserClient } from '@supabase/ssr';
-import type { Location } from './types';
+import type { Location, NewLocation } from './types';
 
 interface Database {
   public: {
     Tables: {
       locations: {
         Row: Location;
-        Insert: Omit<Location, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<Location, 'id' | 'created_at' | 'updated_at'>>;
+        Insert: NewLocation;
+        Update: Partial<NewLocation>;
       };
     };
   };
