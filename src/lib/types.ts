@@ -1,5 +1,8 @@
 import type { locationCategory } from '@/lib/db/schema';
-import type { getPublishedLocations } from '@/lib/db/queries';
+import type {
+  getEditorContacts,
+  getPublishedLocations,
+} from '@/lib/db/queries';
 
 export type Category = (typeof locationCategory.enumValues)[number];
 
@@ -8,3 +11,7 @@ export type Location = Awaited<
   ReturnType<typeof getPublishedLocations>
 >[number];
 export type MarketSchedule = Location['schedules'][number];
+
+/** Resolves to null for anyone who isn't an editor. */
+export type EditorContacts = ReturnType<typeof getEditorContacts>;
+export type Contact = NonNullable<Awaited<EditorContacts>>[string][number];

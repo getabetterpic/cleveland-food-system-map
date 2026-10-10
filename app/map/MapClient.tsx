@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import CategoryFilter from '@/src/components/CategoryFilter';
 import SearchBar from '@/src/components/SearchBar';
 import LocationPanel from '@/src/components/LocationPanel';
-import type { Category, Location } from '@/src/lib/types';
+import type { Category, EditorContacts, Location } from '@/src/lib/types';
 
 // Leaflet touches `window` at import time — client-only.
 const MapView = dynamic(() => import('@/src/components/MapView'), {
@@ -14,7 +14,13 @@ const MapView = dynamic(() => import('@/src/components/MapView'), {
 
 const ALL_CATEGORIES: Category[] = ['garden', 'farm', 'market'];
 
-export default function MapClient({ locations }: { locations: Location[] }) {
+export default function MapClient({
+  locations,
+  contacts,
+}: {
+  locations: Location[];
+  contacts: EditorContacts;
+}) {
   const [activeCategories, setActiveCategories] =
     useState<Category[]>(ALL_CATEGORIES);
   const [query, setQuery] = useState('');
@@ -66,6 +72,7 @@ export default function MapClient({ locations }: { locations: Location[] }) {
       />
       <LocationPanel
         location={selectedLocation}
+        contacts={contacts}
         onClose={() => setSelectedLocation(null)}
       />
     </div>

@@ -1,8 +1,15 @@
 import 'server-only';
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import { cacheLife } from 'next/cache';
+import { createClient } from '@/lib/supabase/server';
 import { db } from './index';
-import { locations, marketSchedules } from './schema';
+import {
+  contacts,
+  editors,
+  locationContacts,
+  locations,
+  marketSchedules,
+} from './schema';
 
 // Supabase serves public buckets at a fixed URL; no client needed.
 function locationImageUrl(path: string): string {
@@ -54,4 +61,51 @@ export async function getPublishedLocations() {
     image_url: image_path ? locationImageUrl(image_path) : null,
     schedules: schedules.filter((s) => s.location_id === loc.id),
   }));
+}
+
+/**
+ * Manager contacts for published locations, keyed by location id — or null
+ * unless the request comes from an editor. Mirrors the contacts RLS policy,
+ * but `db` bypasses RLS, so this editor check is the only thing keeping PII
+ * off the page. Reads the session cookie: never wrap in 'use cache'.
+ */
+export async function getEditorContacts() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub;
+  if (!userId) return null;
+
+  const [editor] = await db
+    .select({ user_id: editors.user_id })
+    .from(editors)
+    .where(eq(editors.user_id, userId));
+  if (!editor) return null;
+
+  const rows = await db
+    .select({
+      location_id: locationContacts.location_id,
+      id: contacts.id,
+      name: contacts.name,
+      phone: contacts.phone,
+      email: contacts.email,
+    })
+    .from(locationContacts)
+    .innerJoin(contacts, eq(locationContacts.contact_id, contacts.id))
+    .innerJoin(
+      locations,
+      and(
+        eq(locationContacts.location_id, locations.id),
+        eq(locations.status, 'published'),
+      ),
+    )
+    .orderBy(asc(contacts.name));
+
+  const byLocation: Record<
+    string,
+    Omit<(typeof rows)[number], 'location_id'>[]
+  > = {};
+  for (const { location_id, ...contact } of rows) {
+    (byLocation[location_id] ??= []).push(contact);
+  }
+  return byLocation;
 }
