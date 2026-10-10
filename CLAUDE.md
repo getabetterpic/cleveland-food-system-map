@@ -18,14 +18,14 @@ Lightweight admin UI for 2–5 authorized editors.
 
 ## Stack
 
-| Layer | Tool |
-|---|---|
-| Frontend | Next.js 16 (App Router, Turbopack) + React 19 + TypeScript |
-| Styling | Tailwind + shadcn/ui (from starter); existing map components use inline styles |
-| Map | react-leaflet + OpenStreetMap (client-only via `next/dynamic`, `ssr: false`) |
-| Backend | Supabase (Postgres + Auth + Storage) via `@supabase/ssr` |
-| Hosting | Vercel |
-| DNS | Namecheap → Cloudflare → Vercel |
+| Layer    | Tool                                                                           |
+| -------- | ------------------------------------------------------------------------------ |
+| Frontend | Next.js 16 (App Router, Turbopack) + React 19 + TypeScript                     |
+| Styling  | Tailwind + shadcn/ui (from starter); existing map components use inline styles |
+| Map      | react-leaflet + OpenStreetMap (client-only via `next/dynamic`, `ssr: false`)   |
+| Backend  | Supabase (Postgres + Auth + Storage) via `@supabase/ssr`                       |
+| Hosting  | Vercel                                                                         |
+| DNS      | Namecheap → Cloudflare → Vercel                                                |
 
 ---
 
@@ -64,19 +64,20 @@ Import alias: `@/*` → repo root (e.g. `@/src/components/MapView`, `@/lib/supab
 Source of truth: `lib/db/schema.ts` (Drizzle). Migrations in `drizzle/` — `npm run db:generate`,
 `npm run db:migrate`. Functions/triggers/grants Drizzle can't express are custom migrations there.
 
-| Table | Purpose |
-|---|---|
-| `locations` | Public site data. `status` enum `draft \| published \| archived` (default `draft`). `image_path` = path in `location-images` bucket |
-| `market_schedules` | Weekday + open/close time + optional season dates, per location |
-| `contacts` | Manager name/phone/email — PII, editors only |
-| `location_contacts` | locations ↔ contacts (many-to-many) |
-| `editors` | Allowlist of `auth.users` ids — managed in Supabase dashboard |
+| Table               | Purpose                                                                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `locations`         | Public site data. `status` enum `draft \| published \| archived` (default `draft`). `image_path` = path in `location-images` bucket |
+| `market_schedules`  | Weekday + open/close time + optional season dates, per location                                                                     |
+| `contacts`          | Manager name/phone/email — PII, editors only                                                                                        |
+| `location_contacts` | locations ↔ contacts (many-to-many)                                                                                                 |
+| `editors`           | Allowlist of `auth.users` ids — managed in Supabase dashboard                                                                       |
 
 - Primary keys are KSUIDs from `public.gen_ksuid()` (DB default)
 - `created_at/by`, `updated_at/by` are set by the `set_audit_fields` trigger; client values are ignored
 - Snake_case TS keys so `typeof locations.$inferSelect` matches supabase-js rows (`src/lib/types.ts`)
 
 RLS:
+
 - Public (anon + any signed-in user): `locations` where `status = 'published'`, and their schedules
 - Editors (row in `editors`): read all, insert/update everything; delete schedules/contacts/links
 - Nobody can delete `locations` — archive instead
@@ -111,10 +112,11 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - Less is more. No over-polished AI aesthetic.
 
 ### Pin colors
-| Category | Color |
-|---|---|
-| Community Garden | `#3a7d44` green |
-| Urban Farm | `#c0392b` red |
+
+| Category                    | Color            |
+| --------------------------- | ---------------- |
+| Community Garden            | `#3a7d44` green  |
+| Urban Farm                  | `#c0392b` red    |
 | Farmers Market / Farm Stand | `#7b2d8b` purple |
 
 ---
@@ -157,6 +159,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ## Completed Phases
 
 ### Phase 0 — Pre-Development
+
 - [x] dev-decisions.md committed to repo
 - [x] CLAUDE.md committed to repo
 - [x] GitHub Project board created
@@ -165,12 +168,14 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - [x] Vercel project created, linked to repo
 
 ### Phase 1 — Scaffold
+
 - [x] Vite + React + TypeScript scaffold initialized
 - [x] react-leaflet, react-router-dom, @supabase/supabase-js installed
 - [x] .env.example committed
 - [x] Repo structure in place per CLAUDE.md
 
 ### Phase 2 — Data & Infrastructure
+
 - [x] `locations` table created with schema above
 - [x] Unique constraint on `(name, lat, lng)`
 - [x] `lat` and `lng` are nullable — markets missing coordinates imported with null
@@ -180,6 +185,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - [x] 105 records imported from KML
 
 ### Phase 3 — Public Map UI
+
 - [x] `src/lib/supabase.ts` — typed Supabase client
 - [x] `src/lib/types.ts` — shared TypeScript types from DB schema
 - [x] `src/pages/MapPage.tsx` — public map with react-leaflet
@@ -233,11 +239,13 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ## Agent Notes
 
 ### Code Review Agent
+
 Runs on every PR via GitHub Actions. Posts review as a PR comment.
 Workflow file: `.github/workflows/code-review.yml`
 Focus: TypeScript correctness, security (no exposed keys), RLS policy gaps, mobile layout issues.
 
 ### KML Import Validation Agent
+
 Runs as part of `scripts/import-kml.ts` before any upsert.
 Reports: duplicate names, missing coordinates, malformed email/phone, unknown categories.
 Critical errors (unrecognized category) skip that record. Warnings (missing coords, no contact, out-of-range ward, outside bounding box) are logged but never block the import.
@@ -262,8 +270,8 @@ Critical errors (unrecognized category) skip that record. Warnings (missing coor
 - No disclaimers, no beginner warnings
 - Flag uncertainty explicitly rather than guessing
 - Answer within scope of what was asked
-- Be terse. One or two sentences unless the answer genuinely requires more. 
-No preamble, no summary at the end. Sarcasm appreciated
+- Be terse. One or two sentences unless the answer genuinely requires more.
+  No preamble, no summary at the end. Sarcasm appreciated
 
 <!-- BEGIN:nextjs-agent-rules -->
 

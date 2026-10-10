@@ -210,9 +210,9 @@ export default function LocationPanel({
           ×
         </button>
 
-        {location.image_url && (
+        {location.image_path && (
           <img
-            src={location.image_url}
+            src={locationImageUrl(location.image_path)}
             alt={location.name}
             style={styles.image}
           />
