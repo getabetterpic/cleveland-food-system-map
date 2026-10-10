@@ -138,7 +138,8 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - Single hero image per location stored in Supabase Storage bucket `location-images`
 - Storage object path stored as `image_path`; public URL built server-side in `lib/db/queries.ts`
 - Read data via Drizzle on the server (`lib/db`), not supabase-js. `DATABASE_URL` bypasses RLS —
-  public queries must filter `status = 'published'` and select no PII/audit columns themselves
+  public queries must filter `status = 'published'` and select no PII/audit columns themselves;
+  contact queries must check editor membership (`getEditorContacts()`)
 - Unauthenticated access: `lib/supabase/proxy.ts` is default-deny; public routes are allowlisted there
 
 ---

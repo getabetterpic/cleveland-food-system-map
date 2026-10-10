@@ -1,6 +1,12 @@
-import { useEffect, useRef } from 'react';
+import { Suspense, use, useEffect, useRef } from 'react';
 import useIsDesktop from '../hooks/useIsDesktop';
-import type { Category, Location, MarketSchedule } from '../lib/types';
+import type {
+  Category,
+  Contact,
+  EditorContacts,
+  Location,
+  MarketSchedule,
+} from '../lib/types';
 
 const CATEGORY_LABEL: Record<Category, string> = {
   garden: 'Community Garden',
@@ -35,6 +41,17 @@ function formatDate(d: string): string {
   });
 }
 
+// Google Maps' cross-platform URL: opens the app on phones, the site elsewhere.
+// Coordinates are exact; fall back to the address for markets without them.
+function directionsUrl(location: Location): string | null {
+  const destination =
+    location.lat !== null && location.lng !== null
+      ? `${location.lat},${location.lng}`
+      : location.address;
+  if (!destination) return null;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
+}
+
 function formatSchedule(s: MarketSchedule): string {
   const hours = `${DAYS[s.day_of_week]} ${formatTime(s.opens_at)}–${formatTime(s.closes_at)}`;
   const season =
@@ -44,12 +61,67 @@ function formatSchedule(s: MarketSchedule): string {
   return hours + season + (s.notes ? ` · ${s.notes}` : '');
 }
 
+// Import stores '2162834400' or '2162834400 x2705'.
+function formatPhone(phone: string): string {
+  const [digits, ext] = phone.split(' x');
+  const m = digits.match(/^(\d{3})(\d{3})(\d{4})$/);
+  const base = m ? `(${m[1]}) ${m[2]}-${m[3]}` : digits;
+  return ext ? `${base} ext. ${ext}` : base;
+}
+
+function ContactItem({ contact }: { contact: Contact }) {
+  return (
+    <li style={styles.contact}>
+      {contact.name && <div style={styles.contactName}>{contact.name}</div>}
+      {contact.phone && (
+        <div style={styles.field}>
+          <a href={`tel:${contact.phone.split(' x')[0]}`} style={styles.link}>
+            {formatPhone(contact.phone)}
+          </a>
+        </div>
+      )}
+      {contact.email && (
+        <div style={styles.field}>
+          <a href={`mailto:${contact.email}`} style={styles.link}>
+            {contact.email}
+          </a>
+        </div>
+      )}
+    </li>
+  );
+}
+
+// Suspends on the streamed promise; renders nothing for non-editors (null).
+function Contacts({
+  contacts,
+  locationId,
+}: {
+  contacts: EditorContacts;
+  locationId: string;
+}) {
+  const list = use(contacts)?.[locationId];
+  if (!list?.length) return null;
+  return (
+    <section style={styles.section} aria-labelledby="contacts-heading">
+      <h3 id="contacts-heading" style={styles.sectionHeading}>
+        Contacts
+      </h3>
+      <ul style={styles.list}>
+        {list.map((c) => (
+          <ContactItem key={c.id} contact={c} />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 interface Props {
   location: Location | null;
+  contacts: EditorContacts;
   onClose: () => void;
 }
 
-export default function LocationPanel({ location, onClose }: Props) {
+export default function LocationPanel({ location, contacts, onClose }: Props) {
   const isDesktop = useIsDesktop();
   const closeRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<Element | null>(null);
@@ -74,6 +146,7 @@ export default function LocationPanel({ location, onClose }: Props) {
   if (!location) return null;
 
   const color = CATEGORY_COLOR[location.category];
+  const directions = directionsUrl(location);
 
   const panelStyle: React.CSSProperties = isDesktop
     ? {
@@ -141,7 +214,18 @@ export default function LocationPanel({ location, onClose }: Props) {
 
           <h2 style={styles.name}>{location.name}</h2>
 
-          {location.address && <p style={styles.field}>{location.address}</p>}
+          {directions && (
+            <p style={styles.field}>
+              <a
+                href={directions}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={styles.link}
+              >
+                {location.address ?? 'Get directions'}
+              </a>
+            </p>
+          )}
 
           {location.website && (
             <p style={styles.field}>
@@ -157,7 +241,7 @@ export default function LocationPanel({ location, onClose }: Props) {
           )}
 
           {location.schedules.length > 0 && (
-            <ul style={styles.schedules} aria-label="Hours">
+            <ul style={{ ...styles.list, marginTop: 12 }} aria-label="Hours">
               {location.schedules.map((s) => (
                 <li key={s.id} style={styles.field}>
                   {formatSchedule(s)}
@@ -169,6 +253,10 @@ export default function LocationPanel({ location, onClose }: Props) {
           {location.notes && (
             <p style={{ ...styles.field, marginTop: 12 }}>{location.notes}</p>
           )}
+
+          <Suspense fallback={null}>
+            <Contacts contacts={contacts} locationId={location.id} />
+          </Suspense>
         </div>
       </div>
     </>
@@ -225,9 +313,30 @@ const styles: Record<string, React.CSSProperties> = {
   link: {
     color: '#08060d',
   },
-  schedules: {
+  list: {
     listStyle: 'none',
-    margin: '12px 0 0',
+    margin: 0,
     padding: 0,
+  },
+  section: {
+    marginTop: 16,
+    paddingTop: 12,
+    borderTop: '1px solid #e5e4e7',
+  },
+  sectionHeading: {
+    margin: '0 0 6px',
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: '0.5px',
+    textTransform: 'uppercase',
+    color: '#6b6375',
+  },
+  contact: {
+    marginBottom: 10,
+  },
+  contactName: {
+    fontSize: 14,
+    fontWeight: 600,
+    color: '#08060d',
   },
 };
