@@ -210,9 +210,9 @@ export default function LocationPanel({
           ×
         </button>
 
-        {location.image_path && (
+        {location.image_url && (
           <img
-            src={locationImageUrl(location.image_path)}
+            src={location.image_url}
             alt={location.name}
             style={styles.image}
           />
@@ -259,6 +259,29 @@ export default function LocationPanel({
 
           {location.schedules.length > 0 && (
             <ul style={{ ...styles.list, marginTop: 12 }} aria-label="Hours">
+              {location.schedules.map((s) => (
+                <li key={s.id} style={styles.field}>
+                  {formatSchedule(s)}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {location.website && (
+            <p style={styles.field}>
+              <a
+                href={location.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={styles.link}
+              >
+                Website
+              </a>
+            </p>
+          )}
+
+          {location.schedules.length > 0 && (
+            <ul style={styles.schedules} aria-label="Hours">
               {location.schedules.map((s) => (
                 <li key={s.id} style={styles.field}>
                   {formatSchedule(s)}
@@ -359,5 +382,10 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 14,
     fontWeight: 600,
     color: '#08060d',
+  },
+  schedules: {
+    listStyle: 'none',
+    margin: '12px 0 0',
+    padding: 0,
   },
 };
