@@ -281,7 +281,7 @@ export default function LocationPanel({
           )}
 
           {location.schedules.length > 0 && (
-            <ul style={styles.schedules} aria-label="Hours">
+            <ul style={{ ...styles.list, marginTop: 12 }} aria-label="Hours">
               {location.schedules.map((s) => (
                 <li key={s.id} style={styles.field}>
                   {formatSchedule(s)}
@@ -383,9 +383,30 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     color: '#08060d',
   },
-  schedules: {
+  list: {
     listStyle: 'none',
-    margin: '12px 0 0',
+    margin: 0,
     padding: 0,
+  },
+  section: {
+    marginTop: 16,
+    paddingTop: 12,
+    borderTop: '1px solid #e5e4e7',
+  },
+  sectionHeading: {
+    margin: '0 0 6px',
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: '0.5px',
+    textTransform: 'uppercase',
+    color: '#6b6375',
+  },
+  contact: {
+    marginBottom: 10,
+  },
+  contactName: {
+    fontSize: 14,
+    fontWeight: 600,
+    color: '#08060d',
   },
 };
