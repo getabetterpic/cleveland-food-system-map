@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import useIsDesktop from '../hooks/useIsDesktop';
+import { locationImageUrl } from '../lib/supabase';
 import type { Category, Location } from '../lib/types';
 
 const CATEGORY_LABEL: Record<Category, string> = {
@@ -96,9 +97,9 @@ export default function LocationPanel({ location, onClose }: Props) {
           ×
         </button>
 
-        {location.image_url && (
+        {location.image_path && (
           <img
-            src={location.image_url}
+            src={locationImageUrl(location.image_path)}
             alt={location.name}
             style={styles.image}
           />
