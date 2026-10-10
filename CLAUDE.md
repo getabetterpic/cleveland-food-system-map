@@ -210,7 +210,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - [x] `useIsDesktop` made SSR-safe (defaults to mobile, resolves after mount)
 - [x] Vite leftovers removed (entry files, configs, template CSS/assets, `src/pages-src/`)
 - [x] `import-kml` restored on the Drizzle schema — `npm run import-kml` (Node runs the .ts directly; needs `DATABASE_URL`)
-- [ ] Decide `/` route: map at root or redirect `/` → `/map`
+- [x] `/` → `/map` (307 in `next.config.ts`; starter home page removed)
 - [ ] Replace starter metadata in `app/layout.tsx`; drop starter home/hero/deploy components
 - [ ] Replace starter auth with magic link + OAuth (folds into #26/#27)
 - [x] Map reads via Drizzle in a server component; `src/lib/supabase.ts` + `useLocations` removed
