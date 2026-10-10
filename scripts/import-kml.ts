@@ -9,6 +9,9 @@
  *
  * Idempotent: locations upsert on (name, lat, lng), contacts on email, links
  * are insert-or-ignore. The whole import runs in one transaction.
+ * Placemarks without <coordinates> (the markets) are geocoded from their
+ * address via the US Census geocoder — once: later runs reuse the stored pin,
+ * so editor corrections stick.
  * Re-imports never touch `status` or `image_path` on existing locations, so
  * editor archiving and uploaded images survive.
  */
@@ -196,13 +199,34 @@ function parseDescription(html: string) {
 // Strategy: if there is a 5-digit ZIP, keep everything up to and including it.
 // ---------------------------------------------------------------------------
 
+// Drops the trailing neighborhood: "4274 Pearl Rd, Cleveland, OH 44109 Old
+// Brooklyn" → up to the ZIP. Greedy so a 5-digit street number isn't the ZIP.
 function cleanAddress(raw: string | null | undefined): string | null {
   if (!raw) return null;
-  const zipMatch = raw.match(/\d{5}/);
-  if (zipMatch && zipMatch.index !== undefined) {
-    return raw.slice(0, zipMatch.index + 5).trim();
-  }
-  return raw.trim() || null;
+  return (raw.match(/^.*\b\d{5}\b/)?.[0] ?? raw).trim() || null;
+}
+
+// US Census one-line geocoder: free, no key, US addresses only. Tolerates
+// venue prefixes ("Lincoln Park 1200 Starkweather Ave…"); misses bare place
+// names ("Shaker Square…"), which stay null for an editor to pin.
+async function geocode(
+  address: string,
+): Promise<{ lat: number; lng: number } | null> {
+  const url = new URL(
+    'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress',
+  );
+  url.search = new URLSearchParams({
+    address,
+    benchmark: 'Public_AR_Current',
+    format: 'json',
+  }).toString();
+  const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+  if (!res.ok) throw new Error(`geocoder HTTP ${res.status}`);
+  const body = (await res.json()) as {
+    result: { addressMatches: { coordinates: { x: number; y: number } }[] };
+  };
+  const match = body.result.addressMatches[0];
+  return match ? { lat: match.coordinates.y, lng: match.coordinates.x } : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -266,11 +290,7 @@ function parsePlacemark(
   // --- Coordinates ---
   let lat: number | null = null;
   let lng: number | null = null;
-  if (!rawCoords) {
-    warnings.push(
-      `"${name}": missing <coordinates> — will be imported with null lat/lng`,
-    );
-  } else {
+  if (rawCoords) {
     const parts = rawCoords.trim().split(',');
     const parsedLng = parseFloat(parts[0] ?? '');
     const parsedLat = parseFloat(parts[1] ?? '');
@@ -305,6 +325,12 @@ function parsePlacemark(
   const address = cleanAddress(rawAddress ?? desc.address);
 
   // --- Warnings ---
+  if (!rawCoords)
+    warnings.push(
+      address
+        ? `"${name}": missing <coordinates> — will geocode "${address}"`
+        : `"${name}": missing <coordinates> and address — will be imported with null lat/lng`,
+    );
   if (desc.contacts.length === 0) warnings.push(`"${name}": no contact info`);
   for (const c of desc.contacts) {
     if (c.email && !EMAIL_RE.test(c.email))
@@ -351,6 +377,7 @@ function parsePlacemark(
 interface WriteCounts {
   inserted: number;
   updated: number;
+  geocoded: number;
   contactsCreated: number;
   linksCreated: number;
 }
@@ -399,19 +426,58 @@ async function upsertContact(
   return { id: row!.id, created: true };
 }
 
+// Fills in coordinates for a placemark that has only an address. Reuses the
+// pin already stored under this name (geocoded earlier or moved by an editor)
+// so the (name, lat, lng) upsert hits the same row; otherwise geocodes, and
+// backfills a row previously imported with null coordinates.
+async function resolveCoords(
+  tx: Tx,
+  location: LocationRecord,
+): Promise<{ lat: number; lng: number } | null> {
+  const [existing] = await tx
+    .select({ id: locations.id, lat: locations.lat, lng: locations.lng })
+    .from(locations)
+    .where(eq(locations.name, location.name))
+    .limit(1);
+  if (existing?.lat != null && existing.lng != null)
+    return { lat: existing.lat, lng: existing.lng };
+
+  const coords = await geocode(location.address!);
+  if (coords && existing)
+    await tx.update(locations).set(coords).where(eq(locations.id, existing.id));
+  return coords;
+}
+
 async function writeRecords(
   db: Db,
   records: ParsedPlacemark[],
+  warnings: string[],
 ): Promise<WriteCounts> {
   const counts: WriteCounts = {
     inserted: 0,
     updated: 0,
+    geocoded: 0,
     contactsCreated: 0,
     linksCreated: 0,
   };
 
   await db.transaction(async (tx) => {
-    for (const { location, contacts: people } of records) {
+    for (const { location: parsed, contacts: people } of records) {
+      let location = parsed;
+      if (location.lat === null && location.address) {
+        const coords = await resolveCoords(tx, location).catch(
+          (e: Error) => `geocoding failed (${e.message})`,
+        );
+        if (typeof coords === 'object' && coords) {
+          location = { ...location, ...coords };
+          counts.geocoded++;
+        } else {
+          warnings.push(
+            `"${location.name}": ${coords ?? `no geocoder match for "${location.address}"`} — imported with null lat/lng`,
+          );
+        }
+      }
+
       // status is only set on insert, so re-imports don't republish archived rows.
       const [loc] = await tx
         .insert(locations)
@@ -522,7 +588,7 @@ async function main() {
     }
     const client = postgres(DATABASE_URL, { max: 1 });
     try {
-      counts = await writeRecords(drizzle({ client }), records);
+      counts = await writeRecords(drizzle({ client }), records, allWarnings);
     } finally {
       await client.end();
     }
@@ -607,6 +673,7 @@ function printSummary(
   if (counts) {
     console.log(`Inserted:          ${counts.inserted}`);
     console.log(`Updated:           ${counts.updated}`);
+    console.log(`Located:           ${counts.geocoded}`);
     console.log(`Contacts created:  ${counts.contactsCreated}`);
     console.log(`Links created:     ${counts.linksCreated}`);
   }
