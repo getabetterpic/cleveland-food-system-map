@@ -63,31 +63,26 @@ Import alias: `@/*` → repo root (e.g. `@/src/components/MapView`, `@/lib/supab
 
 ## Database Schema
 
-```sql
-create table locations (
-  id            uuid primary key default gen_random_uuid(),
-  name          text not null,
-  category      text not null check (category in ('garden','farm','market')),
-  lat           numeric(10,7),          -- nullable: some markets imported without coordinates
-  lng           numeric(10,7),          -- nullable: some markets imported without coordinates
-  address       text,
-  ward          integer,
-  manager_name  text,
-  phone         text,
-  email         text,
-  notes         text,
-  image_url     text,
-  archived      boolean not null default false,
-  created_at    timestamptz not null default now(),
-  updated_at    timestamptz not null default now(),
-  constraint locations_name_lat_lng_key unique (name, lat, lng)
-);
-```
+Source of truth: `lib/db/schema.ts` (Drizzle). Migrations in `drizzle/` — `npm run db:generate`,
+`npm run db:migrate`. Functions/triggers/grants Drizzle can't express are custom migrations there.
 
-RLS policies:
-- `anon` role: SELECT where `archived = false`
-- `authenticated` role: SELECT all rows (including archived)
-- `authenticated` role: INSERT, UPDATE, DELETE
+| Table | Purpose |
+|---|---|
+| `locations` | Public site data. `status` enum `draft \| published \| archived` (default `draft`). `image_path` = path in `location-images` bucket |
+| `market_schedules` | Weekday + open/close time + optional season dates, per location |
+| `contacts` | Manager name/phone/email — PII, editors only |
+| `location_contacts` | locations ↔ contacts (many-to-many) |
+| `editors` | Allowlist of `auth.users` ids — managed in Supabase dashboard |
+
+- Primary keys are KSUIDs from `public.gen_ksuid()` (DB default)
+- `created_at/by`, `updated_at/by` are set by the `set_audit_fields` trigger; client values are ignored
+- Snake_case TS keys so `typeof locations.$inferSelect` matches supabase-js rows (`src/lib/types.ts`)
+
+RLS:
+- Public (anon + any signed-in user): `locations` where `status = 'published'`, and their schedules
+- Editors (row in `editors`): read all, insert/update everything; delete schedules/contacts/links
+- Nobody can delete `locations` — archive instead
+- Signed in ≠ editor: OAuth lets anyone create a session
 
 ---
 
@@ -138,11 +133,10 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 
 ## Data Rules
 
-- `archived = false` is the public filter — never hard delete
-- `archived = true` hides from public map and admin default view
+- `status = 'published'` is the public filter — never hard delete; archive with `status = 'archived'`
 - KML import script lives in `scripts/import-kml.ts` — upserts on name + lat + lng
 - Single hero image per location stored in Supabase Storage bucket `location-images`
-- Image URL stored as `image_url` on the locations record
+- Storage object path stored as `image_path`; build URLs with `locationImageUrl()` (`src/lib/supabase.ts`)
 
 ---
 

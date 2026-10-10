@@ -13,9 +13,9 @@
 - Editor management via Supabase dashboard, not custom UI
 
 ### Data
-- Discrete fields — no blobs. name, category, lat, lng, address, ward,
-  manager_name, phone, email, notes, image_url
-- Soft delete via `archived` boolean — nothing hard deleted
+- Discrete fields — no blobs. Schema in `lib/db/schema.ts` (Drizzle)
+- Manager PII in separate `contacts` table, editor-only via RLS
+- Soft delete via `status = 'archived'` — nothing hard deleted
 - Single hero image per location stored in Supabase Storage
 - KML import script is permanent tooling, not throwaway — runs at cutover
 
