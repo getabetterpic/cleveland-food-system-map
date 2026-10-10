@@ -10,10 +10,13 @@ const ALL_CATEGORIES: Category[] = ['garden', 'farm', 'market'];
 
 export default function MapPage() {
   const { locations, loading } = useLocations();
-  const [activeCategories, setActiveCategories] = useState<Category[]>(ALL_CATEGORIES);
+  const [activeCategories, setActiveCategories] =
+    useState<Category[]>(ALL_CATEGORIES);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
+    null,
+  );
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query), 200);
@@ -32,12 +35,19 @@ export default function MapPage() {
 
   const counts: Record<Category, number> = {
     garden: filtered.filter((l) => l.category === 'garden').length,
-    farm:   filtered.filter((l) => l.category === 'farm').length,
+    farm: filtered.filter((l) => l.category === 'farm').length,
     market: filtered.filter((l) => l.category === 'market').length,
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100dvh',
+        overflow: 'hidden',
+      }}
+    >
       <SearchBar value={query} onChange={setQuery} />
       <CategoryFilter
         activeCategories={activeCategories}

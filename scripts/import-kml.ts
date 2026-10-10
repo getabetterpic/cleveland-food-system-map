@@ -16,14 +16,14 @@ import * as path from 'path';
 import * as xml2js from 'xml2js';
 import * as dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
-import { config } from 'dotenv'
-import { resolve } from 'path'
+import { config } from 'dotenv';
+import { resolve } from 'path';
 
 // ---------------------------------------------------------------------------
 // Env
 // ---------------------------------------------------------------------------
 
-config({ path: resolve(import.meta.dirname, '../.env.local') })
+config({ path: resolve(import.meta.dirname, '../.env.local') });
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? '';
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY ?? '';
@@ -85,13 +85,14 @@ function categoryFromStyleUrl(styleUrl: string | undefined): Category | null {
 // ---------------------------------------------------------------------------
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function extractManagerName(html: string): string | null {
-  const match = html.match(
-    /(?:Garden Manager|Farm [Mm]anager):\s*([^\n<&]+)/
-  );
+  const match = html.match(/(?:Garden Manager|Farm [Mm]anager):\s*([^\n<&]+)/);
   return match ? match[1].trim() || null : null;
 }
 
@@ -100,7 +101,7 @@ function extractManagerName(html: string): string | null {
 // Captures the 10-digit number only; extensions are consumed but not returned.
 function extractPhone(text: string): string | null {
   const match = text.match(
-    /\(?(\d{3})\)?[-.\s]?(\d{3})[-.\s]?(\d{4})(?:\s*(?:ext|x|ext\.)\s*\d+)?/i
+    /\(?(\d{3})\)?[-.\s]?(\d{3})[-.\s]?(\d{4})(?:\s*(?:ext|x|ext\.)\s*\d+)?/i,
   );
   if (!match) return null;
   return `${match[1]}${match[2]}${match[3]}`;
@@ -131,7 +132,7 @@ function cleanAddress(raw: string | undefined): string | null {
 // ---------------------------------------------------------------------------
 
 const CLE_LAT_MIN = 41.35;
-const CLE_LAT_MAX = 41.60;
+const CLE_LAT_MAX = 41.6;
 const CLE_LNG_MIN = -82.0;
 const CLE_LNG_MAX = -81.45;
 
@@ -154,10 +155,7 @@ function first<T>(val: T | T[] | undefined): T | undefined {
   return val;
 }
 
-function attr(
-  node: Record<string, unknown>,
-  name: string
-): string | undefined {
+function attr(node: Record<string, unknown>, name: string): string | undefined {
   const attrs = node['$'] as Record<string, string> | undefined;
   return attrs?.[name];
 }
@@ -166,29 +164,33 @@ function attr(
 type XmlNode = Record<string, any>;
 
 function parsePlacemark(
-  placemark: XmlNode
+  placemark: XmlNode,
 ): { record: LocationRecord; warnings: string[] } | { error: string } {
   const warnings: string[] = [];
 
   const name = (first(placemark['name']) as string | undefined)?.trim() ?? '';
   const styleUrl = first(placemark['styleUrl']) as string | undefined;
-  const rawCoords = first(
-    first(placemark['Point'])?.['coordinates']
-  ) as string | undefined;
+  const rawCoords = first(first(placemark['Point'])?.['coordinates']) as
+    string | undefined;
   const rawAddress = first(placemark['address']) as string | undefined;
-  const descHtml = (first(placemark['description']) as string | undefined) ?? '';
+  const descHtml =
+    (first(placemark['description']) as string | undefined) ?? '';
 
   // --- Coordinates ---
   let lat: number | null = null;
   let lng: number | null = null;
   if (!rawCoords) {
-    warnings.push(`"${name}": missing <coordinates> — will be imported with null lat/lng`);
+    warnings.push(
+      `"${name}": missing <coordinates> — will be imported with null lat/lng`,
+    );
   } else {
     const parts = rawCoords.trim().split(',');
     const parsedLng = parseFloat(parts[0] ?? '');
     const parsedLat = parseFloat(parts[1] ?? '');
     if (!isFinite(parsedLat) || !isFinite(parsedLng)) {
-      warnings.push(`"${name}": invalid coordinates "${rawCoords}" — will be imported with null lat/lng`);
+      warnings.push(
+        `"${name}": invalid coordinates "${rawCoords}" — will be imported with null lat/lng`,
+      );
     } else {
       lat = parsedLat;
       lng = parsedLng;
@@ -234,7 +236,7 @@ function parsePlacemark(
     warnings.push(`"${name}": ward ${ward} out of range (1–21)`);
   if (lat !== null && lng !== null && outsideCleveland(lat, lng))
     warnings.push(
-      `"${name}": coordinates (${lat}, ${lng}) outside Cleveland bounding box`
+      `"${name}": coordinates (${lat}, ${lng}) outside Cleveland bounding box`,
     );
 
   const record: LocationRecord = {
@@ -285,7 +287,7 @@ async function main() {
   collectFolders(topFolders);
 
   const allPlacemarks: XmlNode[] = folders.flatMap(
-    (f) => (f['Placemark'] as XmlNode[] | undefined) ?? []
+    (f) => (f['Placemark'] as XmlNode[] | undefined) ?? [],
   );
 
   // Also pick up top-level placemarks outside any folder
@@ -314,7 +316,9 @@ async function main() {
   }
   for (const [name, count] of nameCounts) {
     if (count > 1)
-      allWarnings.push(`"${name}": duplicate name appears ${count} times in file`);
+      allWarnings.push(
+        `"${name}": duplicate name appears ${count} times in file`,
+      );
   }
 
   // Records with critical errors are counted as skipped; records with only
@@ -323,14 +327,22 @@ async function main() {
 
   if (DRY_RUN) {
     if (VERBOSE) printVerboseTable(records);
-    printSummary(allPlacemarks.length, records.length, 0, 0, errorSkipped, allWarnings, allErrors);
+    printSummary(
+      allPlacemarks.length,
+      records.length,
+      0,
+      0,
+      errorSkipped,
+      allWarnings,
+      allErrors,
+    );
     return;
   }
 
   // --- Supabase upsert ---
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     console.error(
-      'VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not set in .env.local'
+      'VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not set in .env.local',
     );
     process.exit(1);
   }
@@ -367,21 +379,45 @@ async function main() {
     }
   }
 
-  printSummary(allPlacemarks.length, records.length, inserted, updated, skipped, allWarnings, allErrors);
+  printSummary(
+    allPlacemarks.length,
+    records.length,
+    inserted,
+    updated,
+    skipped,
+    allWarnings,
+    allErrors,
+  );
 }
 
 function printVerboseTable(records: LocationRecord[]) {
-  const COL = { name: 40, cat: 8, lat: 11, lng: 12, ward: 5, phone: 14, email: 30 };
+  const COL = {
+    name: 40,
+    cat: 8,
+    lat: 11,
+    lng: 12,
+    ward: 5,
+    phone: 14,
+    email: 30,
+  };
   const pad = (s: string | number | null, w: number) =>
-    String(s ?? '').slice(0, w).padEnd(w);
+    String(s ?? '')
+      .slice(0, w)
+      .padEnd(w);
 
   const header =
-    pad('Name', COL.name) + '  ' +
-    pad('Cat', COL.cat) + '  ' +
-    pad('Lat', COL.lat) + '  ' +
-    pad('Lng', COL.lng) + '  ' +
-    pad('Ward', COL.ward) + '  ' +
-    pad('Phone', COL.phone) + '  ' +
+    pad('Name', COL.name) +
+    '  ' +
+    pad('Cat', COL.cat) +
+    '  ' +
+    pad('Lat', COL.lat) +
+    '  ' +
+    pad('Lng', COL.lng) +
+    '  ' +
+    pad('Ward', COL.ward) +
+    '  ' +
+    pad('Phone', COL.phone) +
+    '  ' +
     pad('Email', COL.email);
   const divider = '-'.repeat(header.length);
 
@@ -390,13 +426,19 @@ function printVerboseTable(records: LocationRecord[]) {
 
   for (const r of records) {
     console.log(
-      pad(r.name, COL.name) + '  ' +
-      pad(r.category, COL.cat) + '  ' +
-      pad(r.lat?.toFixed(5) ?? 'null', COL.lat) + '  ' +
-      pad(r.lng?.toFixed(5) ?? 'null', COL.lng) + '  ' +
-      pad(r.ward, COL.ward) + '  ' +
-      pad(r.phone, COL.phone) + '  ' +
-      pad(r.email, COL.email)
+      pad(r.name, COL.name) +
+        '  ' +
+        pad(r.category, COL.cat) +
+        '  ' +
+        pad(r.lat?.toFixed(5) ?? 'null', COL.lat) +
+        '  ' +
+        pad(r.lng?.toFixed(5) ?? 'null', COL.lng) +
+        '  ' +
+        pad(r.ward, COL.ward) +
+        '  ' +
+        pad(r.phone, COL.phone) +
+        '  ' +
+        pad(r.email, COL.email),
     );
   }
   console.log(divider);
@@ -409,7 +451,7 @@ function printSummary(
   updated: number,
   skipped: number,
   warnings: string[],
-  errors: string[]
+  errors: string[],
 ) {
   console.log(`\n--- Import Summary ---`);
   console.log(`Placemarks found: ${placemarks}`);
