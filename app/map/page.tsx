@@ -1,10 +1,17 @@
+'use client';
+
 import { useEffect, useState } from 'react';
-import useLocations from '../hooks/useLocations';
-import MapView from '../components/MapView';
-import CategoryFilter from '../components/CategoryFilter';
-import SearchBar from '../components/SearchBar';
-import LocationPanel from '../components/LocationPanel';
-import type { Category, Location } from '../lib/types';
+import dynamic from 'next/dynamic';
+import useLocations from '@/src/hooks/useLocations';
+import CategoryFilter from '@/src/components/CategoryFilter';
+import SearchBar from '@/src/components/SearchBar';
+import LocationPanel from '@/src/components/LocationPanel';
+import type { Category, Location } from '@/src/lib/types';
+
+// Leaflet touches `window` at import time — client-only.
+const MapView = dynamic(() => import('@/src/components/MapView'), {
+  ssr: false,
+});
 
 const ALL_CATEGORIES: Category[] = ['garden', 'farm', 'market'];
 

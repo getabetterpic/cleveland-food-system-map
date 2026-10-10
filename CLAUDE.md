@@ -20,9 +20,10 @@ Lightweight admin UI for 2–5 authorized editors.
 
 | Layer | Tool |
 |---|---|
-| Frontend | React + Vite + TypeScript |
-| Map | react-leaflet + OpenStreetMap |
-| Backend | Supabase (Postgres + Auth + Storage) |
+| Frontend | Next.js 16 (App Router, Turbopack) + React 19 + TypeScript |
+| Styling | Tailwind + shadcn/ui (from starter); existing map components use inline styles |
+| Map | react-leaflet + OpenStreetMap (client-only via `next/dynamic`, `ssr: false`) |
+| Backend | Supabase (Postgres + Auth + Storage) via `@supabase/ssr` |
 | Hosting | Vercel |
 | DNS | Namecheap → Cloudflare → Vercel |
 
@@ -32,22 +33,31 @@ Lightweight admin UI for 2–5 authorized editors.
 
 ```
 /
-├── src/
-│   ├── components/       # Shared UI components
-│   ├── pages/            # Route-level components
-│   │   ├── MapPage.tsx   # Public map
-│   │   └── admin/        # Admin UI (protected)
+├── app/                  # Next.js App Router routes
+│   ├── layout.tsx        # Root layout (still starter metadata)
+│   ├── page.tsx          # Starter home page — to be replaced
+│   ├── map/page.tsx      # Public map ('use client')
+│   ├── auth/             # Starter auth routes — to be replaced (see Auth)
+│   └── protected/        # Starter protected route — basis for admin
+├── components/           # Starter/shadcn components
+├── lib/
+│   ├── supabase/         # Starter clients: client.ts, server.ts, proxy.ts
+│   └── utils.ts
+├── proxy.ts              # Next 16 proxy (formerly middleware) — refreshes Supabase session
+├── src/                  # Legacy Vite-era code, still imported by app/map
+│   ├── components/       # MapView, CategoryFilter, SearchBar, LocationPanel
+│   ├── hooks/            # useLocations, useIsDesktop (SSR-safe)
 │   ├── lib/
-│   │   ├── supabase.ts   # Supabase client (typed)
+│   │   ├── supabase.ts   # Typed browser client (createBrowserClient<Database>)
 │   │   └── types.ts      # Shared TypeScript types
-│   ├── hooks/            # Custom React hooks
-│   └── styles/           # Global CSS, tokens
 ├── scripts/
 │   └── import-kml.ts     # KML import tool — permanent, not throwaway
 ├── CLAUDE.md
 ├── dev-decisions.md
 └── .env.example
 ```
+
+Import alias: `@/*` → repo root (e.g. `@/src/components/MapView`, `@/lib/supabase/client`).
 
 ---
 
@@ -86,9 +96,11 @@ RLS policies:
 Never commit secrets. All env vars in Vercel dashboard and `.env.local` locally.
 
 ```
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ```
+
+`VITE_*` vars are gone — Vercel must have the `NEXT_PUBLIC_*` names.
 
 `.env.local` is gitignored. `.env.example` is committed with empty values.
 
@@ -117,6 +129,8 @@ VITE_SUPABASE_ANON_KEY=
 
 - Supabase Auth: magic link + Google OAuth + GitHub OAuth
 - Protected routes redirect unauthenticated users to `/login`
+- The Next starter ships email/password sign-up + password reset under `app/auth/` — that is
+  NOT the target flow. Replace it; no public sign-up (editors are added in Supabase dashboard)
 - Editor management done in Supabase dashboard — no custom invite UI
 - Never roll custom auth logic
 
@@ -188,7 +202,23 @@ VITE_SUPABASE_ANON_KEY=
 
 ## Current Phase
 
-**Phase 4 — Admin UI**
+**Vite → Next.js migration (in progress, branch `getabetterpic/map-in-nextjs`)**
+
+- [x] Next.js + Supabase starter scaffolded (`create-next-app`), Prettier added
+- [x] Public map ported to `app/map/page.tsx` (`MapView` loaded with `ssr: false`)
+- [x] `leaflet`, `react-leaflet`, `@types/leaflet` re-added
+- [x] `src/lib/supabase.ts` switched to `@supabase/ssr` + `NEXT_PUBLIC_*` env vars
+- [x] `useIsDesktop` made SSR-safe (defaults to mobile, resolves after mount)
+- [x] Vite leftovers removed (entry files, configs, template CSS/assets, `src/pages-src/`)
+- [ ] Restore `xml2js` + `dotenv` devDeps and `import-kml` npm script (dropped with old package.json)
+- [ ] Decide `/` route: map at root or redirect `/` → `/map`
+- [ ] Replace starter metadata in `app/layout.tsx`; drop starter home/hero/deploy components
+- [ ] Replace starter auth with magic link + OAuth (folds into #26/#27)
+- [ ] Consolidate Supabase clients (`src/lib/supabase.ts` vs `lib/supabase/client.ts`)
+- [ ] Move `src/` code into Next layout once stable
+- [ ] Update Vercel project framework preset + env vars
+
+**Phase 4 — Admin UI** (paused until migration lands)
 
 - [ ] Auth flow — login page with magic link + Google OAuth + GitHub OAuth (#26)
 - [ ] Protected route — redirect unauthenticated to /login (#27)
@@ -223,6 +253,10 @@ Critical errors (unrecognized category) skip that record. Warnings (missing coor
 - Auth touches at least two layers — always say so in the prompt
 - Form changes touch UI + validation + Supabase call — specify all three
 - Mobile layout first, then desktop — never the other way
+- Anything touching `window`/`document`/Leaflet needs `'use client'` and, at import time,
+  `next/dynamic` with `ssr: false` — say which in the prompt
+- Server vs browser Supabase client matters: `lib/supabase/server.ts` in server components/routes,
+  browser client in `'use client'` code
 
 ## Communication Style
 
