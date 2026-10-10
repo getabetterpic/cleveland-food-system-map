@@ -108,7 +108,7 @@ export default function MapView({
       center={CLEVELAND}
       zoom={12}
       zoomControl={false}
-      style={{ height: 'calc(100vh - 56px)', width: '100%' }}
+      style={{ flex: 1, minHeight: 0, width: '100%' }}
       aria-label="Map of Cleveland food resources"
     >
       <ZoomControl />
