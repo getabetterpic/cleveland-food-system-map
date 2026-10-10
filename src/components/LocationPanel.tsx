@@ -310,8 +310,12 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#6b6375',
     lineHeight: 1.5,
   },
+  // Tailwind preflight strips link color + underline; restore both.
+  // #1d4ed8 on white is ~6.7:1, passes WCAG AA for body text.
   link: {
-    color: '#08060d',
+    color: '#1d4ed8',
+    textDecoration: 'underline',
+    textUnderlineOffset: 2,
   },
   list: {
     listStyle: 'none',
