@@ -1,5 +1,6 @@
 import { Suspense, use, useEffect, useRef } from 'react';
 import useIsDesktop from '../hooks/useIsDesktop';
+import { distanceMiles, formatMiles, type UserPosition } from '../lib/geo';
 import type {
   Category,
   Contact,
@@ -118,10 +119,16 @@ function Contacts({
 interface Props {
   location: Location | null;
   contacts: EditorContacts;
+  userPosition: UserPosition | null;
   onClose: () => void;
 }
 
-export default function LocationPanel({ location, contacts, onClose }: Props) {
+export default function LocationPanel({
+  location,
+  contacts,
+  userPosition,
+  onClose,
+}: Props) {
   const isDesktop = useIsDesktop();
   const closeRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<Element | null>(null);
@@ -147,6 +154,10 @@ export default function LocationPanel({ location, contacts, onClose }: Props) {
 
   const color = CATEGORY_COLOR[location.category];
   const directions = directionsUrl(location);
+  const distance =
+    userPosition && location.lat !== null && location.lng !== null
+      ? distanceMiles(userPosition, { lat: location.lat, lng: location.lng })
+      : null;
 
   const panelStyle: React.CSSProperties = isDesktop
     ? {
@@ -213,6 +224,12 @@ export default function LocationPanel({ location, contacts, onClose }: Props) {
           </span>
 
           <h2 style={styles.name}>{location.name}</h2>
+
+          {distance !== null && (
+            <p style={styles.field}>
+              {formatMiles(distance)} away (straight line)
+            </p>
+          )}
 
           {directions && (
             <p style={styles.field}>
