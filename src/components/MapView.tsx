@@ -9,6 +9,7 @@ import {
   Marker,
   useMap,
 } from 'react-leaflet';
+import type { UserPosition } from '../lib/geo';
 import type { Category, Location } from '../lib/types';
 
 function ZoomControl() {
@@ -33,8 +34,6 @@ function ZoomControl() {
   );
 }
 
-type Fix = { lat: number; lng: number; accuracy: number };
-
 const GEO_ERRORS: Record<number, string> = {
   1: 'Location permission denied',
   2: 'Location unavailable',
@@ -42,10 +41,15 @@ const GEO_ERRORS: Record<number, string> = {
 };
 
 // One-shot fix via the Geolocation API (needs HTTPS or localhost). Shows a dot
-// plus accuracy radius; nothing is stored or sent anywhere.
-function LocateControl() {
+// plus accuracy radius; the position stays in the browser.
+function LocateControl({
+  position,
+  onLocate,
+}: {
+  position: UserPosition | null;
+  onLocate: (position: UserPosition) => void;
+}) {
   const map = useMap();
-  const [fix, setFix] = useState<Fix | null>(null);
   const [locating, setLocating] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   useEffect(() => {
@@ -67,7 +71,7 @@ function LocateControl() {
           lng: coords.longitude,
           accuracy: coords.accuracy,
         };
-        setFix(next);
+        onLocate(next);
         setLocating(false);
         map.flyTo([next.lat, next.lng], Math.max(map.getZoom(), 15));
       },
@@ -108,16 +112,16 @@ function LocateControl() {
       <p role="status" style={zoomStyles.status} hidden={!message}>
         {message}
       </p>
-      {fix && (
+      {position && (
         <>
           <Circle
-            center={[fix.lat, fix.lng]}
-            radius={fix.accuracy}
+            center={[position.lat, position.lng]}
+            radius={position.accuracy}
             interactive={false}
             pathOptions={{ color: '#1d4ed8', weight: 1, fillOpacity: 0.1 }}
           />
           <CircleMarker
-            center={[fix.lat, fix.lng]}
+            center={[position.lat, position.lng]}
             radius={7}
             interactive={false}
             pathOptions={{
@@ -215,16 +219,34 @@ const PIN_ICONS: Record<Category, DivIcon> = {
 
 const CLEVELAND: [number, number] = [41.482, -81.668];
 
+// Brings a selection into view when it isn't already (e.g. picked from the
+// "nearest" chip rather than by tapping its pin).
+function PanToSelected({ location }: { location: Location | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (location?.lat == null || location.lng == null) return;
+    const target: [number, number] = [location.lat, location.lng];
+    if (!map.getBounds().contains(target)) map.panTo(target);
+  }, [map, location]);
+  return null;
+}
+
 interface Props {
   locations: Location[];
   activeCategories: Category[];
+  selectedLocation: Location | null;
   onSelectLocation: (location: Location) => void;
+  userPosition: UserPosition | null;
+  onLocate: (position: UserPosition) => void;
 }
 
 export default function MapView({
   locations,
   activeCategories,
+  selectedLocation,
   onSelectLocation,
+  userPosition,
+  onLocate,
 }: Props) {
   return (
     <MapContainer
@@ -236,8 +258,9 @@ export default function MapView({
     >
       <div style={zoomStyles.wrap}>
         <ZoomControl />
-        <LocateControl />
+        <LocateControl position={userPosition} onLocate={onLocate} />
       </div>
+      <PanToSelected location={selectedLocation} />
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
