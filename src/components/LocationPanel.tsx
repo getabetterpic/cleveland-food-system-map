@@ -1,5 +1,6 @@
 import { Suspense, use, useEffect, useRef } from 'react';
 import useIsDesktop from '../hooks/useIsDesktop';
+import PhotoUpload from './PhotoUpload';
 import { distanceMiles, formatMiles, type UserPosition } from '../lib/geo';
 import type {
   Category,
@@ -103,15 +104,42 @@ function Contacts({
   const list = use(contacts)?.[locationId];
   if (!list?.length) return null;
   return (
-    <section style={styles.section} aria-labelledby="contacts-heading">
-      <h3 id="contacts-heading" style={styles.sectionHeading}>
-        Contacts
-      </h3>
+    <div style={styles.subsection}>
+      <h4 style={styles.subheading}>Contacts</h4>
       <ul style={styles.list}>
         {list.map((c) => (
           <ContactItem key={c.id} contact={c} />
         ))}
       </ul>
+    </div>
+  );
+}
+
+// Everything below the rule is editor-only, labelled as such so editors know
+// the public doesn't see it. Suspends on the streamed editor check.
+function EditorSection({
+  canEdit,
+  contacts,
+  location,
+}: {
+  canEdit: Promise<boolean>;
+  contacts: EditorContacts;
+  location: Location;
+}) {
+  if (!use(canEdit)) return null;
+  return (
+    <section style={styles.section} aria-labelledby="editor-heading">
+      <h3 id="editor-heading" style={styles.sectionHeading}>
+        Editors only
+      </h3>
+      <p style={styles.sectionNote}>Not shown to the public.</p>
+      <PhotoUpload
+        // Remount per location so a pending message doesn't carry over.
+        key={location.id}
+        locationId={location.id}
+        hasImage={location.image_url !== null}
+      />
+      <Contacts contacts={contacts} locationId={location.id} />
     </section>
   );
 }
@@ -119,6 +147,7 @@ function Contacts({
 interface Props {
   location: Location | null;
   contacts: EditorContacts;
+  canEdit: Promise<boolean>;
   userPosition: UserPosition | null;
   onClose: () => void;
 }
@@ -126,6 +155,7 @@ interface Props {
 export default function LocationPanel({
   location,
   contacts,
+  canEdit,
   userPosition,
   onClose,
 }: Props) {
@@ -272,7 +302,11 @@ export default function LocationPanel({
           )}
 
           <Suspense fallback={null}>
-            <Contacts contacts={contacts} locationId={location.id} />
+            <EditorSection
+              canEdit={canEdit}
+              contacts={contacts}
+              location={location}
+            />
           </Suspense>
         </div>
       </div>
@@ -345,12 +379,26 @@ const styles: Record<string, React.CSSProperties> = {
     borderTop: '1px solid #e5e4e7',
   },
   sectionHeading: {
-    margin: '0 0 6px',
+    margin: 0,
     fontSize: 12,
     fontWeight: 600,
     letterSpacing: '0.5px',
     textTransform: 'uppercase',
     color: '#6b6375',
+  },
+  sectionNote: {
+    margin: '2px 0 0',
+    fontSize: 12,
+    color: '#6b6375',
+  },
+  subsection: {
+    marginTop: 14,
+  },
+  subheading: {
+    margin: '0 0 6px',
+    fontSize: 14,
+    fontWeight: 600,
+    color: '#08060d',
   },
   contact: {
     marginBottom: 10,

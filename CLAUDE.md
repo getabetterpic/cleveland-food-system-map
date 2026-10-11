@@ -35,7 +35,7 @@ Lightweight admin UI for 2–5 authorized editors.
 /
 ├── app/                  # Next.js App Router routes
 │   ├── layout.tsx        # Root layout + site metadata; icon.svg = favicon
-│   ├── map/              # Public map: page.tsx (server, Drizzle) → MapClient.tsx ('use client'); layout.tsx nav
+│   ├── map/              # Public map: page.tsx (server, Drizzle) → MapClient.tsx ('use client'); layout.tsx nav; actions.ts server actions
 │   └── auth/             # Starter auth routes + OAuth callback — to be replaced (see Auth)
 ├── components/           # Starter/shadcn components
 ├── lib/
@@ -139,6 +139,12 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - Read data via Drizzle on the server (`lib/db`), not supabase-js. `DATABASE_URL` bypasses RLS —
   public queries must filter `status = 'published'` and select no PII/audit columns themselves;
   contact queries must check editor membership (`getEditorContacts()`)
+- User-initiated writes go through `asUser(claims, tx => …)` (`lib/db/index.ts`): runs as `authenticated`
+  with the verified JWT claims, so RLS enforces editor membership and the audit trigger records `*_by`.
+  After writes that change the public map, `updateTag(LOCATIONS_TAG)`
+- Photos: browser downsizes to JPEG (`src/lib/location-images.ts`, strips EXIF/GPS) and uploads straight
+  to Storage (editor-only `storage.objects` policies); `setLocationImage` action records the path (or `null` to remove) and
+  deletes the replaced object. Paths are `<location id>/<uuid>.jpg`, never reused
 - Unauthenticated access: `lib/supabase/proxy.ts` is default-deny; public routes are allowlisted there
 
 ---
@@ -224,7 +230,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - [ ] Add location form (#29)
 - [ ] Edit location form (#30)
 - [ ] Archive / restore location (#31)
-- [ ] Image upload — Supabase Storage (#32)
+- [x] Image upload — Supabase Storage (#32) — editor Add/Replace/Remove photo in the location panel
 - [ ] Form validation — client and Supabase (#33)
 - [ ] Mobile-first admin layout (#34)
 
