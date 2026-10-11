@@ -19,17 +19,20 @@ const ALL_CATEGORIES: Category[] = ['garden', 'farm', 'market'];
 export default function MapClient({
   locations,
   contacts,
+  canEdit,
 }: {
   locations: Location[];
   contacts: EditorContacts;
+  canEdit: Promise<boolean>;
 }) {
   const [activeCategories, setActiveCategories] =
     useState<Category[]>(ALL_CATEGORIES);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    null,
-  );
+  // Store the id, not the object, so the panel shows fresh server data after
+  // an edit (e.g. a new photo) revalidates `locations`.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedLocation = locations.find((l) => l.id === selectedId) ?? null;
   const [userPosition, setUserPosition] = useState<UserPosition | null>(null);
   const isDesktop = useIsDesktop();
 
@@ -86,7 +89,7 @@ export default function MapClient({
         <button
           type="button"
           style={styles.nearest}
-          onClick={() => setSelectedLocation(nearest.location)}
+          onClick={() => setSelectedId(nearest.location.id)}
         >
           Nearest: <strong>{nearest.location.name}</strong> ·{' '}
           {formatMiles(nearest.miles)}
@@ -100,7 +103,7 @@ export default function MapClient({
           <button
             type="button"
             style={styles.nearestCard}
-            onClick={() => setSelectedLocation(nearest.location)}
+            onClick={() => setSelectedId(nearest.location.id)}
           >
             <span style={styles.nearestLabel}>Nearest to you</span>
             <span style={styles.nearestName}>{nearest.location.name}</span>
@@ -113,7 +116,7 @@ export default function MapClient({
           locations={filtered}
           activeCategories={activeCategories}
           selectedLocation={selectedLocation}
-          onSelectLocation={setSelectedLocation}
+          onSelectLocation={(l) => setSelectedId(l.id)}
           userPosition={userPosition}
           onLocate={setUserPosition}
         />
@@ -121,8 +124,9 @@ export default function MapClient({
       <LocationPanel
         location={selectedLocation}
         contacts={contacts}
+        canEdit={canEdit}
         userPosition={userPosition}
-        onClose={() => setSelectedLocation(null)}
+        onClose={() => setSelectedId(null)}
       />
     </div>
   );
