@@ -1,0 +1,1167 @@
+{
+  "id": "d0dabcd7-3b77-4288-bf32-bcfab1210355",
+  "prevIds": [
+    "51c65ea7-ce13-480e-a09d-9e6907dd62f8"
+  ],
+  "version": "8",
+  "dialect": "postgres",
+  "ddl": [
+    {
+      "values": [
+        "garden",
+        "farm",
+        "market"
+      ],
+      "name": "location_category",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "name": "location_status",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": true,
+      "name": "contacts",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": true,
+      "name": "editors",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": true,
+      "name": "location_contacts",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": true,
+      "name": "locations",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": true,
+      "name": "market_schedules",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "public.gen_ksuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "phone",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "email",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "created_by",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "updated_by",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "editors"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "editors"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "location_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "location_contacts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "contact_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "location_contacts"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "location_contacts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "public.gen_ksuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "location_category",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "category",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "location_status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'draft'",
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "numeric(10,7)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lat",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "numeric(10,7)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lng",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "address",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "smallint",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ward",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "website",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "notes",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "image_path",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "created_by",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "updated_by",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "public.gen_ksuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "location_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "type": "smallint",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "day_of_week",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "type": "time",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "opens_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "type": "time",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "closes_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "season_start",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "season_end",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "notes",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "created_by",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "updated_by",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "contact_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "location_contacts_contact_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "location_contacts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "location_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "market_schedules_location_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "created_by"
+      ],
+      "schemaTo": "auth",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "contacts_created_by_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "updated_by"
+      ],
+      "schemaTo": "auth",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "contacts_updated_by_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "user_id"
+      ],
+      "schemaTo": "auth",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "editors_user_id_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "editors"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "location_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "locations",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "location_contacts_location_id_locations_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "location_contacts"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "contact_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "contacts",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "location_contacts_contact_id_contacts_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "location_contacts"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "created_by"
+      ],
+      "schemaTo": "auth",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "locations_created_by_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "updated_by"
+      ],
+      "schemaTo": "auth",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "locations_updated_by_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "location_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "locations",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "market_schedules_location_id_locations_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "created_by"
+      ],
+      "schemaTo": "auth",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "market_schedules_created_by_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "updated_by"
+      ],
+      "schemaTo": "auth",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "market_schedules_updated_by_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "columns": [
+        "location_id",
+        "contact_id"
+      ],
+      "nameExplicit": false,
+      "name": "location_contacts_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "location_contacts"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "contacts_pkey",
+      "schema": "public",
+      "table": "contacts",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "user_id"
+      ],
+      "nameExplicit": false,
+      "name": "editors_pkey",
+      "schema": "public",
+      "table": "editors",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "locations_pkey",
+      "schema": "public",
+      "table": "locations",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "market_schedules_pkey",
+      "schema": "public",
+      "table": "market_schedules",
+      "entityType": "pks"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "email"
+      ],
+      "nullsNotDistinct": false,
+      "name": "contacts_email_key",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "name",
+        "lat",
+        "lng"
+      ],
+      "nullsNotDistinct": true,
+      "name": "locations_name_lat_lng_key",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "value": "\"lat\" between -90 and 90",
+      "name": "locations_lat_range",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "value": "\"lng\" between -180 and 180",
+      "name": "locations_lng_range",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "value": "(\"lat\" is null) = (\"lng\" is null)",
+      "name": "locations_lat_lng_paired",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "value": "\"ward\" > 0",
+      "name": "locations_ward_positive",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "value": "\"image_path\" !~ '^(/|[a-z]+://)'",
+      "name": "locations_image_path_relative",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "value": "\"day_of_week\" between 0 and 6",
+      "name": "market_schedules_day_of_week_range",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "value": "\"closes_at\" > \"opens_at\"",
+      "name": "market_schedules_hours_order",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "value": "(\"season_start\" is null) = (\"season_end\" is null)",
+      "name": "market_schedules_season_paired",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "value": "\"season_end\" >= \"season_start\"",
+      "name": "market_schedules_season_order",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "withCheck": null,
+      "name": "contacts_select_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "using": null,
+      "withCheck": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "name": "contacts_insert_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "UPDATE",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "withCheck": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "name": "contacts_update_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "DELETE",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "withCheck": null,
+      "name": "contacts_delete_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "contacts"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "user_id = (select auth.uid())",
+      "withCheck": null,
+      "name": "editors_select_self",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "editors"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "withCheck": null,
+      "name": "location_contacts_select_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "location_contacts"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "using": null,
+      "withCheck": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "name": "location_contacts_insert_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "location_contacts"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "UPDATE",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "withCheck": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "name": "location_contacts_update_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "location_contacts"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "DELETE",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "withCheck": null,
+      "name": "location_contacts_delete_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "location_contacts"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "SELECT",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "using": "\"locations\".\"status\" = 'published'",
+      "withCheck": null,
+      "name": "locations_select_public",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "withCheck": null,
+      "name": "locations_select_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "using": null,
+      "withCheck": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "name": "locations_insert_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "UPDATE",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "withCheck": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "name": "locations_update_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "locations"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "SELECT",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.locations l where l.id = \"market_schedules\".\"location_id\")",
+      "withCheck": null,
+      "name": "market_schedules_select_public",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "withCheck": null,
+      "name": "market_schedules_select_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "using": null,
+      "withCheck": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "name": "market_schedules_insert_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "UPDATE",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "withCheck": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "name": "market_schedules_update_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "market_schedules"
+    },
+    {
+      "as": "PERMISSIVE",
+      "for": "DELETE",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "exists (select 1 from public.editors where user_id = (select auth.uid()))",
+      "withCheck": null,
+      "name": "market_schedules_delete_editor",
+      "entityType": "policies",
+      "schema": "public",
+      "table": "market_schedules"
+    }
+  ],
+  "renames": []
+}
