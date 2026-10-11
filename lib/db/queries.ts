@@ -1,7 +1,9 @@
 import 'server-only';
 import { and, asc, eq } from 'drizzle-orm';
-import { cacheLife } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
+import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
+import { LOCATION_IMAGES_BUCKET } from '@/src/lib/location-images';
 import { db } from './index';
 import {
   contacts,
@@ -13,13 +15,17 @@ import {
 
 // Supabase serves public buckets at a fixed URL; no client needed.
 function locationImageUrl(path: string): string {
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/location-images/${path}`;
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${LOCATION_IMAGES_BUCKET}/${path}`;
 }
+
+/** Expire with updateTag() after any write that changes the public map. */
+export const LOCATIONS_TAG = 'locations';
 
 /** Public map data: published locations + schedules, no audit or PII columns. */
 export async function getPublishedLocations() {
   'use cache';
   cacheLife('minutes');
+  cacheTag(LOCATIONS_TAG);
 
   const published = eq(locations.status, 'published');
 
@@ -64,22 +70,30 @@ export async function getPublishedLocations() {
 }
 
 /**
- * Manager contacts for published locations, keyed by location id — or null
- * unless the request comes from an editor. Mirrors the contacts RLS policy,
- * but `db` bypasses RLS, so this editor check is the only thing keeping PII
- * off the page. Reads the session cookie: never wrap in 'use cache'.
+ * Whether the request comes from an editor. Reads the session cookie: never
+ * call inside 'use cache'. Deduped per request.
  */
-export async function getEditorContacts() {
+export const isEditor = cache(async (): Promise<boolean> => {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const userId = data?.claims.sub;
-  if (!userId) return null;
+  if (!userId) return false;
 
   const [editor] = await db
     .select({ user_id: editors.user_id })
     .from(editors)
     .where(eq(editors.user_id, userId));
-  if (!editor) return null;
+  return Boolean(editor);
+});
+
+/**
+ * Manager contacts for published locations, keyed by location id — or null
+ * unless the request comes from an editor. Mirrors the contacts RLS policy,
+ * but `db` bypasses RLS, so this editor check is the only thing keeping PII
+ * off the page.
+ */
+export async function getEditorContacts() {
+  if (!(await isEditor())) return null;
 
   const rows = await db
     .select({
