@@ -1,13 +1,13 @@
 import { createBrowserClient } from '@supabase/ssr';
-import type { Location } from './types';
+import type { Location, NewLocation } from './types';
 
 interface Database {
   public: {
     Tables: {
       locations: {
         Row: Location;
-        Insert: Omit<Location, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<Location, 'id' | 'created_at' | 'updated_at'>>;
+        Insert: NewLocation;
+        Update: Partial<NewLocation>;
       };
     };
   };
@@ -17,5 +17,10 @@ const supabase = createBrowserClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
 );
+
+export function locationImageUrl(path: string): string {
+  return supabase.storage.from('location-images').getPublicUrl(path).data
+    .publicUrl;
+}
 
 export default supabase;
