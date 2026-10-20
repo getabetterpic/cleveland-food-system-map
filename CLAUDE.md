@@ -204,7 +204,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - [x] `src/lib/supabase.ts` switched to `@supabase/ssr` + `NEXT_PUBLIC_*` env vars
 - [x] `useIsDesktop` made SSR-safe (defaults to mobile, resolves after mount)
 - [x] Vite leftovers removed (entry files, configs, template CSS/assets, `src/pages-src/`)
-- [ ] Restore `xml2js` + `dotenv` devDeps and `import-kml` npm script (dropped with old package.json)
+- [x] `import-kml` restored on the Drizzle schema — `npm run import-kml` (Node runs the .ts directly; needs `DATABASE_URL`)
 - [ ] Decide `/` route: map at root or redirect `/` → `/map`
 - [ ] Replace starter metadata in `app/layout.tsx`; drop starter home/hero/deploy components
 - [ ] Replace starter auth with magic link + OAuth (folds into #26/#27)
