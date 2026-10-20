@@ -38,11 +38,25 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push('/protected');
+      router.push('/map');
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Leaves the site for GitHub; on success the browser returns via
+  // /auth/callback, so only a failure to start the flow lands back here.
+  const handleGitHubLogin = async () => {
+    setIsLoading(true);
+    setError(null);
+    const { error } = await createClient().auth.signInWithOAuth({
+      provider: 'github',
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) {
+      setError(error.message);
       setIsLoading(false);
     }
   };
@@ -88,9 +102,22 @@ export function LoginForm({
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && (
+                <p role="alert" className="text-sm font-medium">
+                  {error}
+                </p>
+              )}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Logging in...' : 'Login'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled={isLoading}
+                onClick={handleGitHubLogin}
+              >
+                Sign in with GitHub
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">

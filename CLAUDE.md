@@ -34,11 +34,9 @@ Lightweight admin UI for 2–5 authorized editors.
 ```
 /
 ├── app/                  # Next.js App Router routes
-│   ├── layout.tsx        # Root layout (still starter metadata)
-│   ├── page.tsx          # Starter home page — to be replaced
+│   ├── layout.tsx        # Root layout + site metadata; icon.svg = favicon
 │   ├── map/              # Public map: page.tsx (server, Drizzle) → MapClient.tsx ('use client'); layout.tsx nav
-│   ├── auth/             # Starter auth routes — to be replaced (see Auth)
-│   └── protected/        # Starter protected route — basis for admin
+│   └── auth/             # Starter auth routes + OAuth callback — to be replaced (see Auth)
 ├── components/           # Starter/shadcn components
 ├── lib/
 │   ├── db/               # Drizzle: schema.ts, index.ts (server-only client), queries.ts
@@ -266,3 +264,13 @@ Critical errors (unrecognized category) skip that record. Warnings (missing coor
 - Answer within scope of what was asked
 - Be terse. One or two sentences unless the answer genuinely requires more. 
 No preamble, no summary at the end. Sarcasm appreciated
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
