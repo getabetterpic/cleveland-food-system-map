@@ -11,6 +11,7 @@ export type Location = Awaited<
   ReturnType<typeof getPublishedLocations>
 >[number];
 export type MarketSchedule = Location['schedules'][number];
+export type NewLocation = Omit<Location, 'id'>;
 
 /** Resolves to null for anyone who isn't an editor. */
 export type EditorContacts = ReturnType<typeof getEditorContacts>;
