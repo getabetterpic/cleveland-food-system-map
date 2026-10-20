@@ -1,6 +1,17 @@
-import type { locationCategory, locations } from '@/lib/db/schema';
+import type { locationCategory } from '@/lib/db/schema';
+import type {
+  getEditorContacts,
+  getPublishedLocations,
+} from '@/lib/db/queries';
 
 export type Category = (typeof locationCategory.enumValues)[number];
 
-export type Location = typeof locations.$inferSelect;
-export type NewLocation = typeof locations.$inferInsert;
+/** A location as the public map receives it (see getPublishedLocations). */
+export type Location = Awaited<
+  ReturnType<typeof getPublishedLocations>
+>[number];
+export type MarketSchedule = Location['schedules'][number];
+
+/** Resolves to null for anyone who isn't an editor. */
+export type EditorContacts = ReturnType<typeof getEditorContacts>;
+export type Contact = NonNullable<Awaited<EditorContacts>>[string][number];

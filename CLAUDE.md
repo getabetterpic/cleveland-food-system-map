@@ -36,20 +36,20 @@ Lightweight admin UI for 2–5 authorized editors.
 ├── app/                  # Next.js App Router routes
 │   ├── layout.tsx        # Root layout (still starter metadata)
 │   ├── page.tsx          # Starter home page — to be replaced
-│   ├── map/page.tsx      # Public map ('use client')
+│   ├── map/              # Public map: page.tsx (server, Drizzle) → MapClient.tsx ('use client'); layout.tsx nav
 │   ├── auth/             # Starter auth routes — to be replaced (see Auth)
 │   └── protected/        # Starter protected route — basis for admin
 ├── components/           # Starter/shadcn components
 ├── lib/
+│   ├── db/               # Drizzle: schema.ts, index.ts (server-only client), queries.ts
 │   ├── supabase/         # Starter clients: client.ts, server.ts, proxy.ts
 │   └── utils.ts
 ├── proxy.ts              # Next 16 proxy (formerly middleware) — refreshes Supabase session
 ├── src/                  # Legacy Vite-era code, still imported by app/map
 │   ├── components/       # MapView, CategoryFilter, SearchBar, LocationPanel
-│   ├── hooks/            # useLocations, useIsDesktop (SSR-safe)
+│   ├── hooks/            # useIsDesktop (SSR-safe)
 │   ├── lib/
-│   │   ├── supabase.ts   # Typed browser client (createBrowserClient<Database>)
-│   │   └── types.ts      # Shared TypeScript types
+│   │   └── types.ts      # Shared TypeScript types (derived from Drizzle schema/queries)
 ├── scripts/
 │   └── import-kml.ts     # KML import tool — permanent, not throwaway
 ├── CLAUDE.md
@@ -106,6 +106,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - **Mobile first.** Every component starts at 320px and scales up.
 - **Breakpoint:** 768px for desktop layout (sidebar + map).
 - **Colors:** white/grey/black base. `#3a7d44` accent used sparingly.
+- **Links:** blue `#1d4ed8` + underline (Tailwind preflight strips both — set them explicitly).
 - **No red** anywhere — colorblind accessibility.
 - **Destructive actions** use dark/black styling, never red.
 - **Typography:** clean, no decorative fonts in UI.
@@ -136,7 +137,11 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - `status = 'published'` is the public filter — never hard delete; archive with `status = 'archived'`
 - KML import script lives in `scripts/import-kml.ts` — upserts on name + lat + lng
 - Single hero image per location stored in Supabase Storage bucket `location-images`
-- Storage object path stored as `image_path`; build URLs with `locationImageUrl()` (`src/lib/supabase.ts`)
+- Storage object path stored as `image_path`; public URL built server-side in `lib/db/queries.ts`
+- Read data via Drizzle on the server (`lib/db`), not supabase-js. `DATABASE_URL` bypasses RLS —
+  public queries must filter `status = 'published'` and select no PII/audit columns themselves;
+  contact queries must check editor membership (`getEditorContacts()`)
+- Unauthenticated access: `lib/supabase/proxy.ts` is default-deny; public routes are allowlisted there
 
 ---
 
@@ -205,10 +210,11 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - [x] `useIsDesktop` made SSR-safe (defaults to mobile, resolves after mount)
 - [x] Vite leftovers removed (entry files, configs, template CSS/assets, `src/pages-src/`)
 - [x] `import-kml` restored on the Drizzle schema — `npm run import-kml` (Node runs the .ts directly; needs `DATABASE_URL`)
-- [ ] Decide `/` route: map at root or redirect `/` → `/map`
+- [x] `/` → `/map` (307 in `next.config.ts`; starter home page removed)
 - [ ] Replace starter metadata in `app/layout.tsx`; drop starter home/hero/deploy components
 - [ ] Replace starter auth with magic link + OAuth (folds into #26/#27)
-- [ ] Consolidate Supabase clients (`src/lib/supabase.ts` vs `lib/supabase/client.ts`)
+- [x] Map reads via Drizzle in a server component; `src/lib/supabase.ts` + `useLocations` removed
+- [x] `/map` layout with nav + auth button; `/map` public in proxy allowlist
 - [ ] Move `src/` code into Next layout once stable
 - [ ] Update Vercel project framework preset + env vars
 
