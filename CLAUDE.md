@@ -123,10 +123,10 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 
 ## Auth
 
-- Supabase Auth: magic link + Google OAuth + GitHub OAuth
+- Supabase Auth: email/password + GitHub OAuth (live); magic link + Google OAuth (planned)
 - Protected routes redirect unauthenticated users to `/login`
-- The Next starter ships email/password sign-up + password reset under `app/auth/` — that is
-  NOT the target flow. Replace it; no public sign-up (editors are added in Supabase dashboard)
+- Email/password login + password reset (from the starter, `app/auth/`) stay. Starter sign-up
+  pages still exist; no public sign-up intended (editors are added in Supabase dashboard)
 - Editor management done in Supabase dashboard — no custom invite UI
 - Never roll custom auth logic
 
@@ -222,7 +222,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - [x] `import-kml` restored on the Drizzle schema — `npm run import-kml` (Node runs the .ts directly; needs `DATABASE_URL`)
 - [x] `/` → `/map` (307 in `next.config.ts`; starter home page removed)
 - [ ] Replace starter metadata in `app/layout.tsx`; drop starter home/hero/deploy components
-- [ ] Replace starter auth with magic link + OAuth (folds into #26/#27)
+- [ ] Add magic link + Google OAuth alongside email/password (folds into #26/#27)
 - [x] Map reads via Drizzle in a server component; `src/lib/supabase.ts` + `useLocations` removed
 - [x] `/map` layout with nav + auth button; `/map` public in proxy allowlist
 - [ ] Move `src/` code into Next layout once stable
@@ -230,7 +230,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 
 **Phase 4 — Admin UI** (paused until migration lands)
 
-- [ ] Auth flow — login page with magic link + Google OAuth + GitHub OAuth (#26)
+- [ ] Auth flow — login page with email/password + magic link + Google OAuth + GitHub OAuth (#26)
 - [ ] Protected route — redirect unauthenticated to /login (#27)
 - [ ] Admin location list view (#28)
 - [ ] Add location form (#29)
