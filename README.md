@@ -66,8 +66,28 @@ scripts/          KML import
 
 - Tables: `locations`, `market_schedules`, `contacts`, `location_contacts`, `editors`
 - Public sees only `status = 'published'` locations; nothing is hard-deleted (archive instead)
-- Editors are rows in `editors`, added in the Supabase dashboard — there is no public sign-up.
-  Signing in does not make you an editor.
+- Anyone can create an account, but an account alone grants nothing beyond the public map —
+  editor access is a row in `editors` (see below)
 - Contacts are PII and only returned to editors
+
+## Accounts & editors
+
+Sign-up is open; editing is not.
+
+1. **Create an account** — either:
+   - `/auth/sign-up` (linked as "Sign up" in the nav and on the login page): email + password.
+     Supabase emails a confirmation link that lands the user on `/map`; they sign in at
+     `/auth/login` after confirming.
+   - "Sign in with GitHub" on `/auth/login`: the first sign-in creates the account, via
+     `/auth/callback`. No confirmation step.
+2. **Grant editor access** — in the Supabase dashboard, copy the user's id from
+   Authentication → Users and insert it as `user_id` in the `editors` table. Delete the row to
+   revoke. There is no invite UI.
+
+Until step 2, a signed-in user sees exactly what the public sees. Editor checks run on the server
+(`isEditor()` in `lib/db/queries.ts`) and in RLS, so a non-editor session can't read contacts or
+write anything.
+
+Forgotten passwords: `/auth/forgot-password` emails a reset link to `/auth/update-password`.
 
 See [`CLAUDE.md`](CLAUDE.md) for conventions and [`dev-decisions.md`](dev-decisions.md) for the why.

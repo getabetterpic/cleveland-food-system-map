@@ -124,10 +124,12 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ## Auth
 
 - Supabase Auth: email/password + GitHub OAuth (live); magic link + Google OAuth (planned)
-- Protected routes redirect unauthenticated users to `/login`
-- Email/password login + password reset (from the starter, `app/auth/`) stay. Starter sign-up
-  pages still exist; no public sign-up intended (editors are added in Supabase dashboard)
-- Editor management done in Supabase dashboard — no custom invite UI
+- Protected routes redirect unauthenticated users to `/auth/login`
+- Email/password login, sign-up, and password reset (from the starter, `app/auth/`) stay
+- Sign-up is public: `/auth/sign-up` (email + password, confirmation email → `/map`) or first
+  GitHub sign-in (`/auth/callback`). An account grants nothing beyond the public map
+- Editor access = row in `editors` (`user_id` = `auth.users.id`), inserted in Supabase dashboard;
+  delete the row to revoke. No custom invite UI. Enforced by `isEditor()` + RLS
 - Never roll custom auth logic
 
 ---
